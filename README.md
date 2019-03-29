@@ -1,5 +1,5 @@
 # EDAF50_Project
-Projec in the course EDAF50
+Project in the course EDAF50
 
 Made by:
 + Niklas Hedström, `dat15nhe`
