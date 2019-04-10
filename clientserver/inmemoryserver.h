@@ -1,6 +1,0 @@
-class InMemoryServer{
-    public:
-
-    private:
-    
-};

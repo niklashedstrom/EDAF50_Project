@@ -1,6 +1,0 @@
-class DBServer {
-    public:
-
-    private:
-
-};
