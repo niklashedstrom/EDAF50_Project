@@ -32,9 +32,9 @@ Server init(int argc, char* argv[]){
         exit(2);
     }
 
-    //Database db;
+    Database db;
     if (stoi(argv[2]) == 1) {
-        //db = InMemDatabase();
+        db = InMemDatabase();
     } else if (stoi(argv[2]) == 2) {
         // Create new disk database
     } else {
@@ -53,10 +53,19 @@ Server init(int argc, char* argv[]){
 int main(int argc, char* argv[]) {
     
     auto server = init(argc, argv);
+
+    Database db;
+    if(stoi(argv[2]) == 1){
+        db = InMemDatabase();
+    } else {
+        //disk
+    }
     
     while(true){
         auto conn = server.waitForActivity();
+        cout << "hajdu" << endl;
         if(conn != nullptr){
+            cout << "Reached" << endl;
             try { 
                 cout << "Recieved" << endl;
             } catch (ConnectionClosedException&){
@@ -64,6 +73,7 @@ int main(int argc, char* argv[]) {
                 cout << "Connection closed" << endl;
             }
         }
+        cout << "hejdu" << endl;
     }
     return 0;
 }

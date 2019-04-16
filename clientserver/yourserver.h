@@ -9,11 +9,8 @@
 class YourServer{
 public:
     YourServer(const Database& d): db(d) {}
-    Server init(int argc, char* argv[]);
-//    int run();
 
 private:
-    //Server server;
     Database db;
 };
 

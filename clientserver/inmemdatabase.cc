@@ -1,6 +1,7 @@
 #include <string>
 #include <algorithm>
 #include <list>
+#include <iostream>
 #include "newsgroup.h"
 #include "inmemdatabase.h"
 using namespace std;
@@ -10,7 +11,7 @@ void InMemDatabase::addNewsGroup(const string& name) {
     newGroup.id = counter++;
     newGroup.name = name;
 
-    newsGroups.insert(newGroup);
+    newsGroups.emplace(newGroup.id, newGroup);
 }
 
 void InMemDatabase::removeNewsGroup(long newsGroupId) {
@@ -18,7 +19,7 @@ void InMemDatabase::removeNewsGroup(long newsGroupId) {
 }
 
 void InMemDatabase::addArticle(long newsGroupId, const Article& article) {
-    newsGroups[newsGroupId].articles.insert(article);
+    newsGroups[newsGroupId].articles.emplace(article.id, article);
 }
 
 void InMemDatabase::removeArticle(long newsGroupId, long articleId) {
@@ -28,14 +29,20 @@ void InMemDatabase::removeArticle(long newsGroupId, long articleId) {
 std::list<Article> InMemDatabase::getArticles(long newsGroupId) {
     auto articles = newsGroups[newsGroupId].articles;
     list<Article> tmpList;
-    copy(articles.begin(), articles.end(), tmpList.begin());
-    sort(tmpList.begin(), tmpList.end(), [] (const Article& a1, const Article& a2) {return a1.id < a2.id;});
+    for(auto it = articles.begin(); it != articles.end(); ++it){
+        auto val = (*it).second;
+        tmpList.emplace_back(val);
+    }
+    tmpList.sort();
     return tmpList;
 }
 
 std::list<NewsGroup> InMemDatabase::getNewsGroups() {
     list<NewsGroup> tmpList;
-    copy(newsGroups.begin(), newsGroups.end(), tmpList.begin());
-    sort(tmpList.begin(), tmpList.end(), [] (const NewsGroup& a1, const NewsGroup& a2) {return a1.id < a2.id;});
+    for(auto it = newsGroups.begin(); it != newsGroups.end(); ++it){
+        auto val = (*it).second;
+        tmpList.emplace_back(val);
+    }
+    tmpList.sort();
     return tmpList;
 }

@@ -7,12 +7,12 @@
 
 class Database {
 public:
-    virtual void addNewsGroup(const std::string&);
-    virtual void removeNewsGroup(long newsGroupId);
-    virtual void addArticle(long newsGroupId, const Article&);
-    virtual void removeArticle(long newsGroupId, long articleId);
-    virtual std::list<Article> getArticles(long newsGroupId);
-    virtual std::list<NewsGroup> getNewsGroups();
+    virtual void addNewsGroup(const std::string&){}
+    virtual void removeNewsGroup(long newsGroupId){}
+    virtual void addArticle(long newsGroupId, const Article&){}
+    virtual void removeArticle(long newsGroupId, long articleId){}
+    virtual std::list<Article> getArticles(long newsGroupId){}
+    virtual std::list<NewsGroup> getNewsGroups(){}
 };
 
 #endif

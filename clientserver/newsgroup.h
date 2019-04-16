@@ -9,12 +9,14 @@ struct Article {
     std::string title;
     std::string author;
     std::string content;
+    friend bool operator<(const Article& a1, const Article& a2){ return a1.id < a2.id;}
 };
 
 struct NewsGroup {
     long id;
     std::string name;
     std::map<long, Article> articles;
+    friend bool operator<(const NewsGroup& n1, const NewsGroup& n2){ return n1.id < n2.id;}
 };
 
 #endif
