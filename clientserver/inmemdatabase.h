@@ -3,10 +3,10 @@
 
 #include "database.h"
 
-class InMemDatabase : Database {
+class InMemDatabase : public Database {
 public:
-    Database() = default;
-
+    InMemDatabase() = default;
+    
 private:
     std::map<long, NewsGroup> newsGroups;
     long counter = 1;
