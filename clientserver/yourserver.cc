@@ -72,6 +72,10 @@ int main(int argc, char* argv[]) {
                 server.deregisterConnection(conn);
                 cout << "Connection closed" << endl;
             }
+        } else {
+            conn = make_shared<Connection>();
+            server.registerConnection(conn);
+            cout << "New client connects" << endl;
         }
         cout << "hejdu" << endl;
     }
