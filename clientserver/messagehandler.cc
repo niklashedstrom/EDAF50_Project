@@ -48,7 +48,7 @@ int MessageHandler::recvInt(){
 }
 
 // client -> server
-int MessageHandler::recvIntParamter(){
+int MessageHandler::recvIntParameter(){
     auto c = recvByte();
     if(c != Protocol::PAR_NUM){
         throw ConnectionClosedException();
@@ -66,7 +66,8 @@ string MessageHandler::recvStringParameter(){
     if(p < 0){
         throw ConnectionClosedException();
     }
-    string s = resize(p);
+    string s; 
+    s.resize(p);
     for(int i = 0; i < p.size(); i++){
         s[i] =  conn->read();
     }

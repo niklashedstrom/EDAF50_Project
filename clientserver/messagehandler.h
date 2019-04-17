@@ -16,12 +16,12 @@ class MessageHandler {
     void sendStringParameter(std::string& value);
     Protocol recvCode();
     int recvInt();
-    int recvIntParamter();
+    int recvIntParameter();
     std::string recvStringParameter();
     private:
     Connection& conn;
     void sendByte(int value);
-    unsigned char recvByte()
+    unsigned char recvByte();
 };
 
 

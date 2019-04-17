@@ -4,6 +4,8 @@
 #include "database.h"
 #include "messagehandler.h"
 #include <iostream>
+#include <string>
+
 using namespace std;
 
 void listNewsGroups(Database& db, MessageHandler& m);
@@ -59,7 +61,7 @@ int main(int argc, char* argv[]) {
     
     while(true){
         auto conn = server.waitForActivity();
-        MessageHandler m(conn);
+        MessageHandler m(*conn.get());
         if(conn != nullptr){
             cout << "Reached" << endl;
             try { 
@@ -72,7 +74,7 @@ int main(int argc, char* argv[]) {
                     case Protocol::COM_CREATE_ART: createArticle(db, m); break;    // create article
                     case Protocol::COM_DELETE_ART: deleteArticle(db, m); break;    // delete article
                     case Protocol::COM_GET_ART   : getArticle(db, m); break;       // get article
-                    case Protocol::COM_END       : // command end
+                    case Protocol::COM_END       : break;// command end
                 }
                 m.sendCode(Protocol::ANS_END);
             } catch (ConnectionClosedException&){
@@ -96,7 +98,7 @@ void listNewsGroups(Database& db, MessageHandler& m){
     m.sendIntParameter(tmpList.size());
     for(auto& ng : tmpList){
         m.sendIntParameter(ng.id);
-        m.sendStringParamter(ng.name);
+        m.sendStringParameter(ng.name);
     }
 }
 
@@ -111,7 +113,7 @@ void createNewsGroup(Database& db, MessageHandler& m){
         }
     }
     if(flag){
-        db.createNewsGroup(name);
+        db.addNewsGroup(name);
         m.sendCode(Protocol::ANS_ACK);
     } else {
         m.sendCode(Protocol::ANS_NAK);
@@ -142,12 +144,12 @@ void listArticles(Database& db, MessageHandler& m){
     m.sendCode(Protocol::ANS_LIST_ART);
     auto ngId = m.recvIntParameter();
     auto art = db.getArticles(ngId);
-    if(art != NULL){
+    if(!art.empty()){
         m.sendCode(Protocol::ANS_ACK);
         m.sendIntParameter(art.size());
         for(auto& a : art){
             m.sendIntParameter(a.id);
-            m.sendStringParamter(a.title);
+            m.sendStringParameter(a.title);
         }
     } else { 
         m.sendCode(Protocol::ANS_NAK);
@@ -163,12 +165,12 @@ void createArticle(Database& db, MessageHandler& m){
     auto text = m.recvStringParameter();
     
     auto art = db.getArticles(ngId);
-    if(art != NULL){
+    if(!art.empty()){
         Article a;
         a.title = title;
         a.author = author;
         a.content = text;
-        db.createArticle(a);
+        db.addArticle(a);
         m.sendCode(Protocol::ANS_ACK);
     } else { 
         m.sendCode(Protocol::ANS_NAK);
@@ -177,7 +179,7 @@ void createArticle(Database& db, MessageHandler& m){
 }
 
 void deleteArticle(Database& db, MessageHandler& m){
-    m.sendCode(ANS_DELETE_ART);
+    m.sendCode(Protocol::ANS_DELETE_ART);
     auto ngId = m.recvIntParameter();
     auto artId = m.recvIntParameter();
 
@@ -185,7 +187,7 @@ void deleteArticle(Database& db, MessageHandler& m){
     bool flag = false;
     bool anotherflag = false;
 
-    if(art != NULL){
+    if(!art.empty()){
         for(auto& a : art){
             if(a.id == artId){
                 flag = true;
@@ -196,7 +198,7 @@ void deleteArticle(Database& db, MessageHandler& m){
     }
     if(flag){
         db.removeArticle(ngId, artId);
-        m.sendCode(ANS_ACK);
+        m.sendCode(Protocol::ANS_ACK);
     } else {
         m.sendCode(Protocol::ANS_NAK);
         if(anotherflag) { 
@@ -216,7 +218,7 @@ void getArticle(Database& db, MessageHandler& m){
     bool flag = false;
     bool anotherflag = false;
 
-    if(art != NULL){
+    if(!art.empty()){
         for(auto& a : art){
             if(a.id == artId){
                 flag = true;
@@ -226,8 +228,8 @@ void getArticle(Database& db, MessageHandler& m){
         anotherflag = true;
     }
     if(flag){
-        m.sendStringParameter(art[artId]); //Hämtar artikeln
-        m.sendCode(ANS_ACK);
+        //Hämta artikeln, implementera detta i database och inmemdatabase
+        m.sendCode(Protocol::ANS_ACK);
     } else {
         m.sendCode(Protocol::ANS_NAK);
         if(anotherflag) { 
