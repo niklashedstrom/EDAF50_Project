@@ -8,7 +8,7 @@
 
 
 class MessageHandler {
-    public:
+public:
     MessageHandler(Connection& conn);
     void sendCode(Protocol code);
     void sendInt(int value);
@@ -18,9 +18,9 @@ class MessageHandler {
     int recvInt();
     int recvIntParameter();
     std::string recvStringParameter();
-    private:
-    Connection& conn;
-    void sendByte(int value);
+private:
+    Connection* conn;
+    void sendByte(unsigned char value);
     unsigned char recvByte();
 };
 

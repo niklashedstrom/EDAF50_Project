@@ -170,7 +170,7 @@ void createArticle(Database& db, MessageHandler& m){
         a.title = title;
         a.author = author;
         a.content = text;
-        db.addArticle(a);
+        db.addArticle(ngId, a);
         m.sendCode(Protocol::ANS_ACK);
     } else { 
         m.sendCode(Protocol::ANS_NAK);

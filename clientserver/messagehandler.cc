@@ -49,8 +49,8 @@ int MessageHandler::recvInt(){
 
 // client -> server
 int MessageHandler::recvIntParameter(){
-    auto c = recvByte();
-    if(c != Protocol::PAR_NUM){
+    auto c = recvCode();
+    if(c != Protocol::PAR_NUM){ 
         throw ConnectionClosedException();
     }
     return recvInt();
@@ -58,8 +58,8 @@ int MessageHandler::recvIntParameter(){
 
 // client -> server
 string MessageHandler::recvStringParameter(){
-    auto c = recvByte();
-    if(c != Protocol::PAR_STRING){
+    auto c = recvCode();
+    if(c != Protocol::PAR_STRING){ 
         throw ConnectionClosedException();
     }
     int p = recvInt();
@@ -68,7 +68,7 @@ string MessageHandler::recvStringParameter(){
     }
     string s; 
     s.resize(p);
-    for(int i = 0; i < p.size(); i++){
+    for(int i = 0; i < s.size(); i++){
         s[i] =  conn->read();
     }
     return s;
