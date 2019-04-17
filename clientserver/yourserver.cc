@@ -6,19 +6,12 @@
 #include <iostream>
 using namespace std;
 
-// list newsgroups
 void listNewsGroups(Database& db, MessageHandler& m);
-// create newsgroup
 void createNewsGroup(Database& db, MessageHandler& m);
-// delete newsgroup
 void deleteNewsGroup(Database& db, MessageHandler& m);
-// list articles
 void listArticles(Database& db, MessageHandler& m);
-// create article
 void createArticle(Database& db, MessageHandler& m);
-// delete article
 void deleteArticle(Database& db, MessageHandler& m);
-// get article
 void getArticle(Database& db, MessageHandler& m);
 
 
@@ -72,13 +65,13 @@ int main(int argc, char* argv[]) {
             try { 
                 cout << "Recieved" << endl;
                 switch(m.recvCode()){
-                    case Protocol::COM_LIST_NG   : listNewsGroups(db, m); break; // list newsgroups
-                    case Protocol::COM_CREATE_NG : // create newsgroup
-                    case Protocol::COM_DELETE_NG : // delete newsgroup
-                    case Protocol::COM_LIST_ART  : // list articles
-                    case Protocol::COM_CREATE_ART: // create article
-                    case Protocol::COM_DELETE_ART: // delete article
-                    case Protocol::COM_GET_ART   : // get article
+                    case Protocol::COM_LIST_NG   : listNewsGroups(db, m); break;   // list newsgroups
+                    case Protocol::COM_CREATE_NG : createNewsGroup(db , m); break; // create newsgroup
+                    case Protocol::COM_DELETE_NG : deleteNewsGroup(db, m); break;  // delete newsgroup
+                    case Protocol::COM_LIST_ART  : listArticles(db, m); break;     // list articles
+                    case Protocol::COM_CREATE_ART: createArticle(db, m); break;    // create article
+                    case Protocol::COM_DELETE_ART: deleteArticle(db, m); break;    // delete article
+                    case Protocol::COM_GET_ART   : getArticle(db, m); break;       // get article
                     case Protocol::COM_END       : // command end
                 }
                 m.sendCode(Protocol::ANS_END);
