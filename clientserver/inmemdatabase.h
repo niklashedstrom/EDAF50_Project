@@ -8,14 +8,15 @@ public:
     InMemDatabase() = default;
     void addNewsGroup(const std::string&);
     void removeNewsGroup(long newsGroupId);
-    void addArticle(long newsGroupId, const Article&);
+    void addArticle(long newsGroupId, Article&);
     void removeArticle(long newsGroupId, long articleId);
     std::list<Article> getArticles(long newsGroupId);
     std::list<NewsGroup> getNewsGroups();
 
 private:
     std::map<long, NewsGroup> newsGroups;
-    long counter = 1;
+    long newsgroupCounter = 1;
+    long articleCounter = 1;
 };
 
 #endif

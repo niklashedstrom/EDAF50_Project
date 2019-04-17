@@ -8,7 +8,7 @@ using namespace std;
 
 void InMemDatabase::addNewsGroup(const string& name) {
     NewsGroup newGroup;
-    newGroup.id = counter++;
+    newGroup.id = newsgroupCounter++;
     newGroup.name = name;
 
     newsGroups.emplace(newGroup.id, newGroup);
@@ -18,7 +18,8 @@ void InMemDatabase::removeNewsGroup(long newsGroupId) {
     newsGroups.erase(newsGroupId);
 }
 
-void InMemDatabase::addArticle(long newsGroupId, const Article& article) {
+void InMemDatabase::addArticle(long newsGroupId, Article& article) {
+    article.id = articleCounter++;
     newsGroups[newsGroupId].articles.emplace(article.id, article);
 }
 
