@@ -2,8 +2,7 @@
 #include <algorithm>
 #include <list>
 #include <iostream>
-#include "newsgroup.h"
-#include "inmemdatabase.h"
+#include "diskdatabase.h"
 using namespace std;
 
 
