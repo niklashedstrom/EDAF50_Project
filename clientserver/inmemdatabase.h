@@ -16,7 +16,6 @@ public:
 private:
     std::map<long, NewsGroup> newsGroups;
     long newsgroupCounter = 1;
-    long articleCounter = 1;
 };
 
 #endif

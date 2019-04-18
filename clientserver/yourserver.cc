@@ -30,9 +30,9 @@ Server init(int argc, char* argv[]){
         exit(2);
     }
 
-    Database db;
+    //Database db;
     if (stoi(argv[2]) == 1) {
-        db = InMemDatabase();
+        //db = InMemDatabase();
     } else if (stoi(argv[2]) == 2) {
         // Create new disk database
     } else {
@@ -52,31 +52,34 @@ int main(int argc, char* argv[]) {
     
     auto server = init(argc, argv);
 
-    Database db;
+    InMemDatabase db{};
     if(stoi(argv[2]) == 1){
-        db = InMemDatabase();
+        //db = InMemDatabase();
+        cout << "Created DB!" << endl;
     } else {
         //disk
     }
     
     while(true){
         auto conn = server.waitForActivity();
-        MessageHandler m(*conn.get());
+        
         if(conn != nullptr){
-            cout << "Reached" << endl;
+            MessageHandler m{*conn.get()};
             try { 
-                cout << "Recieved" << endl;
-                switch(m.recvCode()){
-                    case Protocol::COM_LIST_NG   : listNewsGroups(db, m); break;   // list newsgroups
+                auto reviecedCode = m.recvCode(); 
+                switch(reviecedCode){
+                    case Protocol::COM_LIST_NG   : listNewsGroups(db, m);   break; // list newsgroups
                     case Protocol::COM_CREATE_NG : createNewsGroup(db , m); break; // create newsgroup
-                    case Protocol::COM_DELETE_NG : deleteNewsGroup(db, m); break;  // delete newsgroup
-                    case Protocol::COM_LIST_ART  : listArticles(db, m); break;     // list articles
-                    case Protocol::COM_CREATE_ART: createArticle(db, m); break;    // create article
-                    case Protocol::COM_DELETE_ART: deleteArticle(db, m); break;    // delete article
-                    case Protocol::COM_GET_ART   : getArticle(db, m); break;       // get article
-                    case Protocol::COM_END       : break;// command end
+                    case Protocol::COM_DELETE_NG : deleteNewsGroup(db, m);  break; // delete newsgroup
+                    case Protocol::COM_LIST_ART  : listArticles(db, m);     break; // list articles
+                    case Protocol::COM_CREATE_ART: createArticle(db, m);    break; // create article
+                    case Protocol::COM_DELETE_ART: deleteArticle(db, m);    break; // delete article
+                    case Protocol::COM_GET_ART   : getArticle(db, m);       break; // get article
                 }
                 m.sendCode(Protocol::ANS_END);
+                if(Protocol::COM_END != m.recvCode()){
+                    cout << "ENDDDDDDD" << endl;
+                }
             } catch (ConnectionClosedException&){
                 server.deregisterConnection(conn);
                 cout << "Connection closed" << endl;
@@ -86,7 +89,6 @@ int main(int argc, char* argv[]) {
             server.registerConnection(conn);
             cout << "New client connects" << endl;
         }
-        cout << "hejdu" << endl;
     }
     return 0;
 }
@@ -107,10 +109,19 @@ void createNewsGroup(Database& db, MessageHandler& m){
     auto name = m.recvStringParameter();
     auto tmpList = db.getNewsGroups();
     bool flag = true;
-    for(auto& ng : tmpList){
-        if(ng.name == name){
-            flag = false;
+    if(!tmpList.empty()){
+        auto it = tmpList.begin();
+        while(it != tmpList.end()){
+            auto ng = *it;
+            cout << ng.name << endl; 
+            if(ng.name == name){
+                flag = false;
+            }
+            ++it;    
         }
+
+    } else { 
+        flag = true;
     }
     if(flag){
         db.addNewsGroup(name);
@@ -144,7 +155,14 @@ void listArticles(Database& db, MessageHandler& m){
     m.sendCode(Protocol::ANS_LIST_ART);
     auto ngId = m.recvIntParameter();
     auto art = db.getArticles(ngId);
-    if(!art.empty()){
+
+    bool flag = false;
+    for(auto& ng : db.getNewsGroups()){
+        if (ng.id == ngId){
+            flag = true;
+        }
+    }
+    if(flag){
         m.sendCode(Protocol::ANS_ACK);
         m.sendIntParameter(art.size());
         for(auto& a : art){
@@ -165,7 +183,15 @@ void createArticle(Database& db, MessageHandler& m){
     auto text = m.recvStringParameter();
     
     auto art = db.getArticles(ngId);
-    if(!art.empty()){
+
+    bool flag = false;
+    for(auto& ng : db.getNewsGroups()){
+        if (ng.id == ngId){
+            flag = true;
+        }
+    }
+
+    if(flag){
         Article a;
         a.title = title;
         a.author = author;
@@ -214,28 +240,31 @@ void getArticle(Database& db, MessageHandler& m){
     auto ngId = m.recvIntParameter();
     auto artId = m.recvIntParameter();
 
-    auto art = db.getArticles(ngId);
-    bool flag = false;
-    bool anotherflag = false;
-
-    if(!art.empty()){
-        for(auto& a : art){
-            if(a.id == artId){
-                flag = true;
-            }
-        }
-    } else { 
-        anotherflag = true;
+    bool ngflag = false;
+    for(auto& ng : db.getNewsGroups()){
+        if(ng.id == ngId) ngflag = true;
     }
-    if(flag){
-        //Hämta artikeln, implementera detta i database och inmemdatabase
-        m.sendCode(Protocol::ANS_ACK);
-    } else {
+    if(!ngflag){
         m.sendCode(Protocol::ANS_NAK);
-        if(anotherflag) { 
-            m.sendCode(Protocol::ERR_NG_DOES_NOT_EXIST);
-        } else {
-            m.sendCode(Protocol::ERR_ART_DOES_NOT_EXIST);
+        m.sendCode(Protocol::ERR_NG_DOES_NOT_EXIST);
+        return;
+    }
+
+    bool artflag = false;
+    Article temp;
+    for(auto& a : db.getArticles(ngId)){
+        if(a.id == artId){ 
+            artflag = true;
+            temp = a;
         }
+    }
+    if(artflag){
+        m.sendCode(Protocol::ANS_ACK);
+        m.sendStringParameter(temp.title);
+        m.sendStringParameter(temp.author);
+        m.sendStringParameter(temp.content);
+    } else { 
+        m.sendCode(Protocol::ANS_NAK);
+        m.sendCode(Protocol::ERR_ART_DOES_NOT_EXIST);
     }
 }

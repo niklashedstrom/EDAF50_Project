@@ -13,13 +13,13 @@ public:
     void sendCode(Protocol code);
     void sendInt(int value);
     void sendIntParameter(int value);
-    void sendStringParameter(std::string& value);
+    void sendStringParameter(std::string value);
     Protocol recvCode();
     int recvInt();
     int recvIntParameter();
     std::string recvStringParameter();
 private:
-    Connection* conn;
+    Connection& conn;
     void sendByte(unsigned char value);
     unsigned char recvByte();
 };

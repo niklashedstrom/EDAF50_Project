@@ -2,7 +2,7 @@
 
 using std::string;
 
-MessageHandler::MessageHandler(Connection& c): conn(&c){}
+MessageHandler::MessageHandler(Connection& c): conn(c){}
 
 // server -> client
 void MessageHandler::sendCode(Protocol code){
@@ -11,10 +11,10 @@ void MessageHandler::sendCode(Protocol code){
 
 // server -> client
 void MessageHandler::sendInt(int value){
-    conn->write((value >> 24) & 0xFF);
-    conn->write((value >> 16) & 0xFF);
-    conn->write((value >> 8) & 0xFF);
-    conn->write(value & 0xFF);
+    conn.write((value >> 24) & 0xFF);
+    conn.write((value >> 16) & 0xFF);
+    conn.write((value >> 8) & 0xFF);
+    conn.write(value & 0xFF);
 }
 
 // server -> client
@@ -24,7 +24,7 @@ void MessageHandler::sendIntParameter(int value){
 }
 
 // server -> client
-void MessageHandler::sendStringParameter(string& value){
+void MessageHandler::sendStringParameter(string value){
     sendCode(Protocol::PAR_STRING);
     sendInt(value.size());
     for(char c : value){
@@ -40,10 +40,10 @@ Protocol MessageHandler::recvCode(){
 
 // client -> server
 int MessageHandler::recvInt(){
-    unsigned char byte1 = conn->read();
-    unsigned char byte2 = conn->read();
-    unsigned char byte3 = conn->read();
-    unsigned char byte4 = conn->read();
+    unsigned char byte1 = conn.read();
+    unsigned char byte2 = conn.read();
+    unsigned char byte3 = conn.read();
+    unsigned char byte4 = conn.read();
     return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
 }
 
@@ -69,7 +69,7 @@ string MessageHandler::recvStringParameter(){
     string s; 
     s.resize(p);
     for(int i = 0; i < s.size(); i++){
-        s[i] =  conn->read();
+        s[i] =  conn.read();
     }
     return s;
 
@@ -77,10 +77,10 @@ string MessageHandler::recvStringParameter(){
 
 // server -> client
 void MessageHandler::sendByte(unsigned char value){
-    conn->write(value);
+    conn.write(value);
 }
 
 // client -> server
 unsigned char MessageHandler::recvByte(){
-    return conn->read();
+    return conn.read();
 }
