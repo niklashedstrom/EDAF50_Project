@@ -15,7 +15,6 @@ public:
 
 private:
     long newsgroupCounter = 1;
-    long articleCounter = 1;
 };
 
 #endif
