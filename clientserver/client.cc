@@ -123,7 +123,7 @@ void listNewsgroups(MessageHandler& m){
         for(auto i = 0; i != size; ++i){
             auto nbr = m.recvIntParameter();
             auto name = m.recvStringParameter();
-            cout << nbr << ", " << name << endl;
+            cout << "id: " << nbr << ", name: " << name << endl;
         }
     }
     Protocol end = m.recvCode();
@@ -211,7 +211,7 @@ void listArticles(MessageHandler& m){
         for(auto i = 0; i != size; ++i){
             auto nbr = m.recvIntParameter();
             auto name = m.recvStringParameter();
-            cout << nbr << ", " << name << endl;
+            cout << "id: " << nbr << ", name: " << name << endl;
         }
     } else {
         Protocol err = m.recvCode();
@@ -348,7 +348,7 @@ void getArticle(MessageHandler& m){
         string title = m.recvStringParameter();
         string author = m.recvStringParameter();
         string content = m.recvStringParameter();
-        cout << title << ", " << author << ", " << content << endl;
+        cout << "Title: " << title << ", Author: " << author << ", Content: " << content << endl;
     } else {
         Protocol noExist = m.recvCode();
         if(noExist == Protocol::ERR_NG_DOES_NOT_EXIST){
@@ -365,6 +365,6 @@ void getArticle(MessageHandler& m){
 }
 
 void end(){
-    cout << "BYE" << endl;
+    cout << "Exiting..." << endl;
     exit(1);
 }

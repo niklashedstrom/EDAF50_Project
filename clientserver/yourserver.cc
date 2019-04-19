@@ -1,8 +1,8 @@
-#include "yourserver.h"
 #include "connectionclosedexception.h"
 #include "inmemdatabase.h"
 #include "database.h"
 #include "messagehandler.h"
+#include "server.h"
 #include <iostream>
 #include <string>
 
@@ -15,7 +15,6 @@ void listArticles(Database& db, MessageHandler& m);
 void createArticle(Database& db, MessageHandler& m);
 void deleteArticle(Database& db, MessageHandler& m);
 void getArticle(Database& db, MessageHandler& m);
-
 
 Server init(int argc, char* argv[]){
     if (argc != 3) {
@@ -30,12 +29,7 @@ Server init(int argc, char* argv[]){
         exit(2);
     }
 
-    //Database db;
-    if (stoi(argv[2]) == 1) {
-        //db = InMemDatabase();
-    } else if (stoi(argv[2]) == 2) {
-        // Create new disk database
-    } else {
+    if (!((stoi(argv[2]) == 1) || (stoi(argv[2]) == 2))) {
         std::cout << "Wrong argument, 1 for in mem db, 2 for disk db" << std::endl;
         exit(3);
     }
@@ -48,18 +42,20 @@ Server init(int argc, char* argv[]){
     return server;
 }
 
+
 int main(int argc, char* argv[]) {
     
     auto server = init(argc, argv);
 
-    InMemDatabase db{};
+    Database *db;
     if(stoi(argv[2]) == 1){
-        //db = InMemDatabase();
-        cout << "Created DB!" << endl;
+        db = new InMemDatabase();
+        cout << "Created In memory DB!" << endl;
     } else {
-        //disk
+        //db = new DiskDatabase();
+        cout << "Created Disk DB!" << endl;
     }
-    
+
     while(true){
         auto conn = server.waitForActivity();
         
@@ -68,17 +64,17 @@ int main(int argc, char* argv[]) {
             try { 
                 auto reviecedCode = m.recvCode(); 
                 switch(reviecedCode){
-                    case Protocol::COM_LIST_NG   : listNewsGroups(db, m);   break; // list newsgroups
-                    case Protocol::COM_CREATE_NG : createNewsGroup(db , m); break; // create newsgroup
-                    case Protocol::COM_DELETE_NG : deleteNewsGroup(db, m);  break; // delete newsgroup
-                    case Protocol::COM_LIST_ART  : listArticles(db, m);     break; // list articles
-                    case Protocol::COM_CREATE_ART: createArticle(db, m);    break; // create article
-                    case Protocol::COM_DELETE_ART: deleteArticle(db, m);    break; // delete article
-                    case Protocol::COM_GET_ART   : getArticle(db, m);       break; // get article
+                    case Protocol::COM_LIST_NG   : listNewsGroups(*db, m);   break; // list newsgroups
+                    case Protocol::COM_CREATE_NG : createNewsGroup(*db , m); break; // create newsgroup
+                    case Protocol::COM_DELETE_NG : deleteNewsGroup(*db, m);  break; // delete newsgroup
+                    case Protocol::COM_LIST_ART  : listArticles(*db, m);     break; // list articles
+                    case Protocol::COM_CREATE_ART: createArticle(*db, m);    break; // create article
+                    case Protocol::COM_DELETE_ART: deleteArticle(*db, m);    break; // delete article
+                    case Protocol::COM_GET_ART   : getArticle(*db, m);       break; // get article
                 }
                 m.sendCode(Protocol::ANS_END);
                 if(Protocol::COM_END != m.recvCode()){
-                    cout << "ENDDDDDDD" << endl;
+                    cout << "End.." << endl;
                 }
             } catch (ConnectionClosedException&){
                 server.deregisterConnection(conn);
@@ -90,9 +86,9 @@ int main(int argc, char* argv[]) {
             cout << "New client connects" << endl;
         }
     }
+    delete db;
     return 0;
 }
-
 
 void listNewsGroups(Database& db, MessageHandler& m){
     m.sendCode(Protocol::ANS_LIST_NG);

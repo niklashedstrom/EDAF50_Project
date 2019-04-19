@@ -1,6 +1,0 @@
-class Client{
-    public:
-
-    private:
-    
-};
