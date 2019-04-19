@@ -111,7 +111,10 @@ void listNewsgroups(MessageHandler& m){
     m.sendCode(Protocol::COM_LIST_NG);
     m.sendCode(Protocol::COM_END);
     Protocol ans = m.recvCode();
-    //ans == ANS_LIST_NG
+    if(ans != Protocol::ANS_LIST_NG) {
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
     auto size = m.recvIntParameter();
     if(size < 1){
         cout << "No newsgroups existing" << endl;
@@ -124,18 +127,23 @@ void listNewsgroups(MessageHandler& m){
         }
     }
     Protocol end = m.recvCode();
-    //end == ANS_END
+    if(end != Protocol::ANS_END){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
 }
 void createNewsgroup(MessageHandler& m){
     cout << "Enter newsgroup title: " << endl;
     string title = getLine();
 
-    cout << title << endl;
     m.sendCode(Protocol::COM_CREATE_NG);
     m.sendStringParameter(title);
     m.sendCode(Protocol::COM_END);
     Protocol ans = m.recvCode();
-    //ans == ANS_CREATE_NG
+    if(ans != Protocol::ANS_CREATE_NG){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);  
+    }
     Protocol status = m.recvCode();
     if(status == Protocol::ANS_ACK){
         cout << "Newsgroup created!" << endl;
@@ -144,7 +152,10 @@ void createNewsgroup(MessageHandler& m){
         cout << "Newsgroup already exists!" << endl;
     }
     Protocol end = m.recvCode();
-    //end == ANS_END
+    if(end != Protocol::ANS_END){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
 }
 void deleteNewsgroup(MessageHandler& m){
     cout << "Enter newsgroup id: " << endl;
@@ -159,7 +170,10 @@ void deleteNewsgroup(MessageHandler& m){
     m.sendCode(Protocol::COM_END);
 
     Protocol ans = m.recvCode();
-    //ans == ANS_DELETE_NG
+    if(ans != Protocol::ANS_DELETE_NG){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
     Protocol status = m.recvCode();
     if(status == Protocol::ANS_ACK){
         cout << "Newsgroup deleted!" << endl;
@@ -168,7 +182,10 @@ void deleteNewsgroup(MessageHandler& m){
         cout << "Newsgroup doesn't exist!" << endl;
     }
     Protocol end = m.recvCode();
-    //end == ANS_END
+    if(end != Protocol::ANS_END){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
 }
 void listArticles(MessageHandler& m){
     cout << "Enter newsgroup id: " << endl;
@@ -183,7 +200,10 @@ void listArticles(MessageHandler& m){
     m.sendCode(Protocol::COM_END);
 
     Protocol ans = m.recvCode();
-    //ans == ANS_LIST_ART
+    if(ans != Protocol::ANS_LIST_ART){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
     Protocol status = m.recvCode();
     if(status == Protocol::ANS_ACK){
         auto size = m.recvIntParameter();
@@ -198,7 +218,10 @@ void listArticles(MessageHandler& m){
         cout << "Newsgroup dosen't exist!" << endl;
     }
     Protocol end = m.recvCode();
-    //end == ANS_END
+    if(end != Protocol::ANS_END){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
 }
 
 void createArticle(MessageHandler& m){
@@ -214,12 +237,14 @@ void createArticle(MessageHandler& m){
         exit(1);
     }
     cout << "\nEnter title: ";
-    cin >> title;
+    title = getLine();
     cout << "\nEnter author: ";
-    cin >> author;
+    author = getLine();
     cout << "\nEnter text: ";
-    cin >> content;
+    content = getLine();
     
+    cout << title << ", " << author << ", " << content;
+
     m.sendCode(Protocol::COM_CREATE_ART);
     m.sendIntParameter(id);
     m.sendStringParameter(title);
@@ -228,7 +253,10 @@ void createArticle(MessageHandler& m){
     m.sendCode(Protocol::COM_END);
 
     Protocol ans = m.recvCode();
-    //ans == ANS_CREATE_ART
+    if(ans != Protocol::ANS_CREATE_ART){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
     Protocol status = m.recvCode();
     if(status == Protocol::ANS_ACK){
         cout << "Article created!" << endl;
@@ -237,7 +265,10 @@ void createArticle(MessageHandler& m){
         cout << "Newsgroup dosen't exist!" << endl;
     }
     Protocol end = m.recvCode();
-    //end == ANS_END
+    if(end != Protocol::ANS_END){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
 }
 void deleteArticle(MessageHandler& m){
     long ngId;
@@ -262,7 +293,10 @@ void deleteArticle(MessageHandler& m){
     m.sendCode(Protocol::COM_END);
 
     Protocol ans = m.recvCode();
-    //ans == ANS_DELETE_ART
+    if(ans != Protocol::ANS_DELETE_ART){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
     Protocol status = m.recvCode();
     if(status == Protocol::ANS_ACK){
         cout << "Article deleted!" << endl;
@@ -275,7 +309,10 @@ void deleteArticle(MessageHandler& m){
         }
     }
     Protocol end = m.recvCode();
-    //end == ANS_END
+    if(end != Protocol::ANS_END){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
 }
 
 void getArticle(MessageHandler& m){
@@ -302,7 +339,10 @@ void getArticle(MessageHandler& m){
     m.sendCode(Protocol::COM_END);
 
     Protocol ans = m.recvCode();
-    //ans == ANS_GET_ART
+    if(ans != Protocol::ANS_GET_ART){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
     Protocol status = m.recvCode();
     if(status == Protocol::ANS_ACK){
         string title = m.recvStringParameter();
@@ -318,7 +358,10 @@ void getArticle(MessageHandler& m){
         }
     }
     Protocol end = m.recvCode();
-    //end == ANS_END
+    if(end != Protocol::ANS_END){
+        cout << "Wrong protocol recieved" << endl;
+        exit(1);
+    }
 }
 
 void end(){
