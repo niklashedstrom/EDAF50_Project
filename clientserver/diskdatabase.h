@@ -15,6 +15,7 @@ public:
 
 private:
     long newsgroupCounter = 1;
+    bool exists(const char *filename);
 };
 
 #endif
