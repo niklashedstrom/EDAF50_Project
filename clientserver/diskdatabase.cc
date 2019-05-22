@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 #include <algorithm>
 #include <list>
 #include <iostream>
@@ -8,36 +9,40 @@
 
 using namespace std;
 
+using Helper = vector<string>;
+using Helpers = vector<Helper>;
+
 sqlite3* DB;
-int exit = 0;
 
 DiskDatabase::DiskDatabase() {
-  int exit = 0;
+    exit = 0;
+    char* messageError;
 
-  if(exists("diskdatabase.db")) {
-    exit = sqlite3_open("diskdatabase.db", &DB);
-  } else {
-    exit = sqlite3_open("diskdatabase.db", &DB);
+    ifstream ifile("diskdatabase.db");
+    if(!ifile){
+        cout << "No .db file, creating a new!" << endl;
+        exit = sqlite3_open("diskdatabase.db", &DB);
 
-    /** Creates outline for database */
-    string sql = "CREATE TABLE newsgroups("
-                 "ng_id     INT PRIMARY KEY AUTOINCREMENT,"
+        /** Creates outline for database */
+        string sql =
+                 "CREATE TABLE newsgroups("
+                 "ng_id     INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "ng_name   TEXT UNIQUE NOT NULL);"
-                 "CREATE TABLE posted_articles("
-                 "at_id     INTEGER NOT NULL,"
-                 "ng_id     INTEGER NOT NULL,"
-                 "FOREIGN KEY (at_id) REFERENCES articles(at_id),"
-                 "FOREIGN KEY (ng_id) REFERENCES newsgroups(ng_id));"
                  "CREATE TABLE articles("
-                 "at_id     INT PRIMARY KEY AUTOINCREMENT,"
+                 "at_id     INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "at_title  TEXT NOT NULL,"
                  "at_text   TEXT,"
                  "au_name   TEXT,"
-                 "ng_id     INT,"
+                 "ng_id     INTEGER,"
                  "FOREIGN KEY (ng_id) REFERENCES newsgroups(ng_id));";
-
-    char* messageError;
-    exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
+    
+        
+        exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
+    } else {
+        cout << "Opening existing .db file!" << endl;
+        exit = sqlite3_open("diskdatabase.db", &DB);
+    }
+    
 
     if (exit != SQLITE_OK) {
       cerr << "One or more errors occured:" << endl;
@@ -46,50 +51,109 @@ DiskDatabase::DiskDatabase() {
     } else {
       cout << "Success" << endl;
     }
-  }
 }
+
 
 /** Borde funka */
 void DiskDatabase::addNewsGroup(const string& name) {
-  int exit = 0;
+    exit = 0;
 
-  string sql = "INSERT INTO newsgroups (ng_name) VALUES ('" + name + "');";
-  char* messageError;
-  exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
+    string sql = "INSERT INTO newsgroups (ng_name) VALUES ('" + name + "');";
+    char* messageError;
+    exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
 }
 
 /** Borde funka */
 void DiskDatabase::removeNewsGroup(long newsGroupId) {
-  int exit = 0;
+    exit = 0;
 
-  string sql = "DELETE FROM newsgroups WHERE ng_id = " + to_string(newsGroupId) + ";";
-  char* messageError;
-  exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
+    string sql = "DELETE FROM newsgroups WHERE ng_id = " + to_string(newsGroupId) + ";";
+    char* messageError;
+    exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
 }
 
 void DiskDatabase::addArticle(long newsGroupId, Article& article) {
-  int exit = 0;
-  string title = article.title;
-  string text = article.content;
-  string name = article.author;
+    exit = 0;
+    string title = article.title;
+    string text = article.content;
+    string name = article.author;
 
-  string sql = "INSERT INTO articles (at_title, at_text, au_name)"
-               "VALUES ('" + title + "', '" + text + "', '" + name + "');"
-               "INSERT INTO posted_articles VALUES (" + to_string(article.id) + ", " + to_string(newsGroupId) + ");";
+    string sql = "INSERT INTO articles (at_title, at_text, au_name, ng_id)"
+                "VALUES ('" + title + "', '" + text + "', '" + name + "', '" + to_string(newsGroupId) + "');";
 
-  char* messageError;
-  exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
+    char* messageError;
+    exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
 }
 
 void DiskDatabase::removeArticle(long newsGroupId, long articleId) {
-  int exit = 0;
+    exit = 0;
 
-  string sql = "DELETE FROM posted_articles WHERE "
+    string sql = "DELETE FROM articles WHERE "
                "at_id = " + to_string(articleId) + " AND ng_id = " + to_string(newsGroupId) + ";";
 
-  char* messageError;
-  exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
+    char* messageError;
+    exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messageError);
 }
+
+list<Article> DiskDatabase::getArticles(long newsGroupId) {
+    list<Article> tmp;
+    string sql = "SELECT * FROM articles WHERE ng_id = " + to_string(newsGroupId) + ";";
+    Helpers helpers = select_stmt(sql.c_str());
+    for(auto& h : helpers){
+        Article art;
+        art.id = stoi(h[0]);
+        art.title = h[1];
+        art.content = h[2];
+        art.author = h[3];
+        tmp.push_back(art);
+    }
+    return tmp;
+}
+
+list<NewsGroup> DiskDatabase::getNewsGroups() {
+    list<NewsGroup> tmp;
+    Helpers helpers = select_stmt("SELECT * FROM newsgroups;");
+    for(auto& h : helpers){
+        NewsGroup ng;
+        ng.id = stoi(h[0]);
+        ng.name = h[1];
+        tmp.push_back(ng);
+    }
+
+    return tmp;
+}
+ 
+// Help functions for sqlite3
+
+Helpers DiskDatabase::select_stmt(const char* stmt){
+    Helpers helpers;
+    char* errmsg;
+    int ret = sqlite3_exec(DB, stmt, [](void* used, int argc, char **argv, char **azColName) 
+                                {Helpers* helpers = static_cast<Helpers*>(used);
+                                 try {
+                                     helpers->emplace_back(argv, argv + argc);
+                                 } catch (...){
+                                     return 1;
+                                 }
+                                 return 0;}, &helpers, &errmsg);
+    if(ret != SQLITE_OK){
+        cerr << "Error in select statement " << stmt << "[" << errmsg << "]\n";
+    } else {
+        std::cerr << helpers.size() << " records returned.\n";
+    }
+    return helpers;
+}
+
+void DiskDatabase::sql_stmt(const char* stmt){
+    char* errmsg;
+    int ret = sqlite3_exec(DB, stmt, 0, 0, &errmsg);
+    if(ret != SQLITE_OK){
+        cerr << "Error in select statement " << stmt << "[" << errmsg << "]\n";
+    }
+}
+
+
+
 
 /*
 list<string> Database::getArticles() const {
@@ -130,7 +194,3 @@ list<string> Database::getArticles() const {
 
 // list<NewsGroup> DiskDatabase::getNewsGroups() {}
 
-bool DiskDatabase::exists(const char *filename) {
-  ifstream ifile(filename);
-  return ifile;
-}

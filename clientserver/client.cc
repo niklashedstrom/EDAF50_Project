@@ -243,7 +243,8 @@ void createArticle(MessageHandler& m){
     cout << "\nEnter text: ";
     content = getLine();
     
-    cout << title << ", " << author << ", " << content;
+    cout << id << endl;
+    cout << title << ", " << author << ", " << content << endl;
 
     m.sendCode(Protocol::COM_CREATE_ART);
     m.sendIntParameter(id);

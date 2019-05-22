@@ -2,6 +2,12 @@
 #define DISKDATABASE_H
 
 #include "database.h"
+#include <sqlite3.h>
+#include <vector>
+#include <string>
+
+using Helper = std::vector<std::string>;
+using Helpers = std::vector<Helper>;
 
 class DiskDatabase : public Database {
 public:
@@ -16,6 +22,9 @@ public:
 private:
     long newsgroupCounter = 1;
     bool exists(const char *filename);
+    int exit = 0;
+    Helpers select_stmt(const char* stmt);
+    void sql_stmt(const char* stmt);
 };
 
 #endif

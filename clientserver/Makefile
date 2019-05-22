@@ -34,6 +34,7 @@ libclientserver.a: connection.o server.o
 	ranlib libclientserver.a
 
 server: yourserver.o connection.o server.o diskdatabase.o inmemdatabase.o messagehandler.o
+	g++ yourserver.cc server.cc connection.cc inmemdatabase.cc diskdatabase.cc messagehandler.cc -l sqlite3 -o server
 client: client.o messagehandler.o connection.o
 
 bin:

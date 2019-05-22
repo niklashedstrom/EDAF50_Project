@@ -1,5 +1,6 @@
 #include "connectionclosedexception.h"
 #include "inmemdatabase.h"
+#include "diskdatabase.h"
 #include "database.h"
 #include "messagehandler.h"
 #include "server.h"
@@ -52,7 +53,7 @@ int main(int argc, char* argv[]) {
         db = new InMemDatabase();
         cout << "Created In memory DB!" << endl;
     } else {
-        //db = new DiskDatabase();
+        db = new DiskDatabase();
         cout << "Created Disk DB!" << endl;
     }
 
@@ -139,6 +140,7 @@ void deleteNewsGroup(Database& db, MessageHandler& m){
         }
     }
     if(flag){
+        cout << "Flag is true" << endl;
         db.removeNewsGroup(id);
         m.sendCode(Protocol::ANS_ACK);
     } else {
